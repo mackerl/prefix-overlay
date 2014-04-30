@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>                                                                                                     
+<repositories version="1.0">
+  <repo priority="50" quality="experimental" status="unofficial">
+    <name>gentoo-mackerl</name>
+    <description>Gentoo Prefix Overlay providing ebuilds needed by mackerl.</description>
+    <homepage>http://github.com/mackerl/</homepage>
+    <owner>
+      <email>mackerl@salomon.at</email>
+    </owner>
+    <source type="git">https://github.com/mackerl/prefix-overlay.git</source>
+  </repo>
+</repositories>
