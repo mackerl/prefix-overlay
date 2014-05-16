@@ -1,0 +1,135 @@
+? .cproject
+? cycletime.patch
+Index: src/Driver.cc
+===================================================================
+RCS file: /cvsrootb/saloon/wamas_x/utilities/logging/cpp/logtool/src/Driver.cc,v
+retrieving revision 1.17
+diff -r1.17 Driver.cc
+5a6
+> #include <regex.h>
+519c520,522
+< 			filter.ptr->regex(boost::regex(rex));
+---
+>             regex_t regex={};
+>         	regcomp(&regex, rex.c_str(), 0);
+> 			filter.ptr->regex(regex);
+532c535,537
+< 			filter.ptr->regex(boost::regex(rex));
+---
+>             regex_t regex={};
+>         	regcomp(&regex, rex.c_str(), 0);
+> 			filter.ptr->regex(regex);
+546c551,553
+<             filter.ptr->regex(boost::regex(rex));
+---
+>             regex_t regex={};
+>         	regcomp(&regex, rex.c_str(), 0);
+> 			filter.ptr->regex(regex);
+Index: src/LogConf.cc
+===================================================================
+RCS file: /cvsrootb/saloon/wamas_x/utilities/logging/cpp/logtool/src/LogConf.cc,v
+retrieving revision 1.17
+diff -r1.17 LogConf.cc
+9a10
+> #include <regex.h>
+75,79c76,90
+<     PrioConfMap::const_reverse_iterator iter;
+<     boost::match_flag_type flags = boost::match_default;
+<     int prio = INT_MAX;
+<     
+<     for ( iter = conf_.rbegin(); iter != conf_.rend(); iter++ ) {
+---
+>     int counter=0;
+> 
+> #ifdef WXTIME
+> 	static double difftime=0.0;
+> 	clock_t starttime=clock();
+> #endif
+> 
+> 	int prio=INT_MIN;
+> 
+>     for ( PrioConfMap::const_reverse_iterator iter = conf_.rbegin(); iter != conf_.rend(); iter++,counter++ ) {
+> 
+>         if( prio > iter->first ) {
+>         	break;
+>         }
+> 
+81,94c92,99
+<     
+<         if ( prio > match->priority() ) {
+<             if ( actions.size() > 0 ) {
+<                 break;
+<             }
+<             else {
+<                 prio = match->priority();
+<             }
+<         }  
+<         
+<         if ( !boost::regex_search(logspec, match->regex(), flags)
+<           || (level < match->level())
+<         ) {
+<             continue;
+---
+> 
+>         if ( level >= match->level() ) {
+>         	if ( regexec(&match->regex(), logspec.c_str(), 0, NULL, 0) == 0  ) {
+>         		prio=iter->first;
+>         		actions.insert(actions.end(),
+>         				match->getActions().begin(), match->getActions().end());
+> 
+>         	}
+96,97d100
+<         actions.insert(actions.end(),
+<             match->getActions().begin(), match->getActions().end());
+99c102,109
+<     
+---
+> 
+> #ifdef WXTIME
+>     clock_t endtime=clock();
+>     difftime+=1000.0 * (endtime-starttime) / CLOCKS_PER_SEC;
+>     long ldiff=(long) difftime;
+>     std::cerr<<"counter: "<<counter<<" difftime: "<< ldiff<< " [ms]"<<std::endl;
+> #endif
+> 
+Index: src/Match.cc
+===================================================================
+RCS file: /cvsrootb/saloon/wamas_x/utilities/logging/cpp/logtool/src/Match.cc,v
+retrieving revision 1.8
+diff -r1.8 Match.cc
+14c14
+< 	: regex_("something_that_wont_match")
+---
+> 	: regex_()
+22,23c22
+< 	: regex_(regx)
+< 	, regexString_(regx)    
+---
+> 	: regexString_(regx)
+27c26,28
+< {}
+---
+> {
+> 	regcomp(&regex_, regx.c_str(), 0);
+> }
+Index: src/Match.h
+===================================================================
+RCS file: /cvsrootb/saloon/wamas_x/utilities/logging/cpp/logtool/src/Match.h,v
+retrieving revision 1.6
+diff -r1.6 Match.h
+10c10
+< #include <boost/regex.hpp>
+---
+> #include <regex.h>
+23a24
+> 	~Match() { regfree(&regex_); }
+26,27c27,28
+<     inline boost::regex const& regex() { return regex_; }
+< 	inline void regex(boost::regex const& rx) { regex_ = rx; }
+---
+>     inline regex_t const& regex() { return regex_; }
+> 	inline void regex(regex_t const& rx) { regex_ = rx; }
+40c41
+<     boost::regex regex_;
+---
+>     regex_t regex_;

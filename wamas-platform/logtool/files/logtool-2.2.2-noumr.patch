@@ -1,0 +1,11 @@
+--- logtool-2.2.2/src/logtool.cc.orig	2009-03-06 10:21:12.000000000 +0100
++++ logtool-2.2.2/src/logtool.cc	2009-03-06 10:21:21.000000000 +0100
+@@ -245,7 +245,7 @@
+ {
+     static char     failSaveLogBuffer[MD_FAILLOGBUF_LEN];
+     static char     *logBuffer = NULL;
+-    int rv;
++    int rv = 0;
+     
+     if ( facility == NULL ) {
+         throw logging::LogToolError("LogPrintf() has been called without facility!");

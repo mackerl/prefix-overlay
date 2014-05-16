@@ -1,0 +1,51 @@
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=11729
+
+--- src/LogConf.cc.orig	2009-04-29 14:27:26 +0200
++++ src/LogConf.cc	2009-04-29 14:28:05 +0200
+@@ -72,7 +72,7 @@
+ {
+     boost::mutex::scoped_lock lock(mutex_);
+     Actions actions;
+-    PrioConfMap::const_reverse_iterator iter;
++    PrioConfMap::reverse_iterator iter;
+     boost::match_flag_type flags = boost::match_default;
+     int prio = INT_MAX;
+     
+@@ -138,7 +138,7 @@
+ 
+ std::ostream& operator<<(std::ostream& os, LogConf& conf)
+ {
+-    PrioConfMap::const_reverse_iterator it;
++    PrioConfMap::reverse_iterator it;
+     Actions::const_iterator iter;
+     int cnt = 0; 
+ 
+--- src/ProtocolHandler.cc.orig	2009-04-29 14:29:48 +0200
++++ src/ProtocolHandler.cc	2009-04-29 14:30:36 +0200
+@@ -30,7 +30,7 @@
+ SupportedProtocols ProtocolHandler::supportedProtocols()
+ {
+     SupportedProtocols versions;
+-    Mapping::const_reverse_iterator iter;
++    Mapping::reverse_iterator iter;
+     
+     for (iter = mapping_.rbegin(); iter != mapping_.rend(); ++iter) {
+         versions.push_back(iter->first);
+@@ -40,7 +40,7 @@
+ 
+ ProtocolPtr ProtocolHandler::getHandshakeProtocol()
+ {
+-    Mapping::const_reverse_iterator iter;
++    Mapping::reverse_iterator iter;
+     
+     iter = mapping_.rbegin();
+     if ( iter == mapping_.rend() ) {
+@@ -62,7 +62,7 @@
+ 
+ SupportedProtocols ProtocolHandler::getCommonProtocol(SupportedProtocols protocols)
+ {
+-    Mapping::const_reverse_iterator local;
++    Mapping::reverse_iterator local;
+     SupportedProtocols::const_iterator remote;
+     SupportedProtocols common;
+     

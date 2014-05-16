@@ -1,0 +1,16 @@
+--- logtool-2.2.2/src/LogDriver.cc.orig	2011-05-02 11:35:09.620166126 +0200
++++ logtool-2.2.2/src/LogDriver.cc	2011-05-02 11:40:37.876848960 +0200
+@@ -70,7 +70,12 @@
+     /* replace file */
+ 	pos = 0;
+     while ( (pos = message.find("%f", pos)) <= len ) {
+-        message.replace(pos, 2, msg->file());
++		std::string file = msg->file();
++		std::string::size_type pathsep = file.find_last_of("/\\");
++		if (pathsep != std::string::npos && (pathsep + 1) < file.size()) {
++			file = file.substr(pathsep + 1);
++		}
++        message.replace(pos, 2, file);
+         len = message.size();
+ 		pos += msg->file().size();
+     }

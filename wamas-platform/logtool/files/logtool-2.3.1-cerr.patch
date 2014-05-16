@@ -1,0 +1,10 @@
+--- src/LogErrorwriter.cc.bak	2014-03-26 08:46:49.948854252 +0100
++++ src/LogErrorwriter.cc	2014-03-26 08:47:01.648854043 +0100
+@@ -41,7 +41,6 @@
+ 	time_t now = time(0);
+ 	role();
+ 
+-	std::cerr << errMsg <<std::endl;
+ 	if ( openFile() ) {
+ 		errFile_ << getDateStr(now) << " "
+ 				<< getTimeStr(now) << ": "

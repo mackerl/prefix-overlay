@@ -1,0 +1,10 @@
+# ChangeLog for wamas-platform/owil
+# Copyright 1999-2011 Gentoo Foundation; Distributed under the GPL v2
+# $Header: $
+
+  10 Oct 2011; Michael Haubenwallner <haubi@gentoo.org> confix.eclass:
+  (confix_bootstrap) change to S-dir only if there is no ./Confix2.pkg
+
+  27 Oct 2010; Michael Haubenwallner <haubi@gentoo.org> confix.eclass:
+  add support for EAPI 2
+

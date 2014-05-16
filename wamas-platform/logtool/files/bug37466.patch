@@ -1,0 +1,21 @@
+--- src/Driver.h.orig	2014-04-29 16:27:30.629780645 +0200
++++ src/Driver.h	2014-04-29 16:28:01.119780391 +0200
+@@ -151,7 +151,7 @@
+ 		__tag_FlatRegex(): origin(".*"), activity(".*"), facility(".*"), level(0) {}
+ 	} FlatRegex, *FlatRegexPtr;
+ 
+-	typedef struct {
++	typedef struct __tag_FilterDefault{
+ 		MatchPtr ptr;
+ 		/* Not using FileSpecStruct, because there are no Ptr's here! */
+ 		struct __tag_Defaults {
+--- src/parser.yy.orig	2014-04-29 16:30:02.069779382 +0200
++++ src/parser.yy	2014-04-29 16:30:20.319779230 +0200
+@@ -5,6 +5,7 @@
+ #include <string>
+ #include <list>
+ #include <iostream>
++#include <stdio.h>
+ 
+ #include "Driver.h"
+ 

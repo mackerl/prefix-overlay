@@ -1,0 +1,18 @@
+diff -ru logtool-2.2.2.orig/Confix2.pkg logtool-2.2.2/Confix2.pkg
+--- logtool-2.2.2.orig/Confix2.pkg	2009-11-03 09:20:30.443172666 +0100
++++ logtool-2.2.2/Confix2.pkg	2009-11-03 09:20:48.110169086 +0100
+@@ -14,3 +14,14 @@
+ PACKAGE_NAME("logtool")
+ PACKAGE_VERSION(cvsversion)
+ 
++from libconfix.setups.boilerplate import AutoBoilerplate
++from libconfix.setups.c import AutoC
++from libconfix.setups.automake import Automake
++from libconfix.setups.cmake import CMake
++from libconfix.setups.plainfile import Plainfile
++
++SETUP([AutoBoilerplate(),
++       AutoC(),
++       Automake(use_libtool=True, library_dependencies=False),
++       CMake(library_dependencies=False),
++       Plainfile()])

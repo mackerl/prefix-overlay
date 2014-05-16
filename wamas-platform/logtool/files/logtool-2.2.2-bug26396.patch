@@ -1,0 +1,208 @@
+Index: src/ClientHandler.cc
+===================================================================
+RCS file: /cvsroot/saloon/wamas_x/utilities/logging/cpp/logtool/src/ClientHandler.cc,v
+retrieving revision 1.16
+diff -u -r1.16 ClientHandler.cc
+--- logtool-HEAD/src/ClientHandler.cc	29 Apr 2011 08:45:57 -0000	1.16
++++ logtool-HEAD/src/ClientHandler.cc	22 Jul 2011 13:38:33 -0000
+@@ -28,6 +28,7 @@
+ 	, line_()
+ 	, messages_()
+ 	, server_(server)
++	, confChangeNotified_(0)
+ 	, confChanged_(0)
+ {
+     boost::shared_ptr<LogLine> tmp(new LogLine(sock));
+@@ -40,8 +41,10 @@
+ {
+     if ( line_->receive(readfd) ) {
+         parse(line_->receivedData().str());
+-        if ( confChanged_ < LogConfMgr::instance().conf()->changeTime() ) {
+-            sendConf();
++        if ( confChanged_ < LogConfMgr::instance().conf()->changeTime()
++		  && confChanged_ == confChangeNotified_
++		) {
++			sendConfChangeNotification();
+         }
+     }
+     if ( ! line_->connected() ) {
+@@ -115,6 +118,46 @@
+ }
+          
+ 
++/* Tell the log-client to request new conf update, because
++ * we must not send the whole conf when not request by client:
++ * When the client does not read the conf sent, the send-buffer
++ * may overflow, and we hang in sending the conf (bug#26396).
++ * This assumes the conf-request message fits into the send-buffer
++ * (unlike the whole conf).
++ */
++bool ClientHandler::sendConfChangeNotification()
++{
++    std::string version;
++
++    version = prot_->version();
++
++    if ( version.compare(V10) == 0 ) {
++        try {
++            Protocol_V10* protV10 = dynamic_cast<Protocol_V10*>(prot_.get());
++            std::stringstream data;
++            std::string conf;
++        
++            protV10->type(LOGCONF_REQUEST);
++            conf = protV10->generate();
++
++            data << LOG_SOM << conf.size() << LOG_SEP << conf;
++
++            if ( ! line_->send(data.str()) ) {
++                return (false);
++            }
++            confChangeNotified_ = LogConfMgr::instance().conf()->changeTime();
++        }
++        catch (LogToolError& e) {
++            writeError(e.what());
++            return (false);
++        }
++    }
++    else {
++        return (false);
++    }
++    return (true);
++}
++
+ bool ClientHandler::sendConf()
+ {
+     std::string version;
+@@ -137,7 +180,7 @@
+             if ( ! line_->send(data.str()) ) {
+                 return (false);
+             }
+-            confChanged_ = LogConfMgr::instance().conf()->changeTime();
++            confChangeNotified_ = confChanged_ = LogConfMgr::instance().conf()->changeTime();
+         }
+         catch (LogToolError& e) {
+             writeError(e.what());
+Index: src/ClientHandler.h
+===================================================================
+RCS file: /cvsroot/saloon/wamas_x/utilities/logging/cpp/logtool/src/ClientHandler.h,v
+retrieving revision 1.8
+diff -u -r1.8 ClientHandler.h
+--- logtool-HEAD/src/ClientHandler.h	22 Jan 2009 10:49:09 -0000	1.8
++++ logtool-HEAD/src/ClientHandler.h	22 Jul 2011 13:38:33 -0000
+@@ -37,6 +37,7 @@
+ 		, line_()
+ 		, messages_()
+ 		, server_(that.server_)
++		, confChangeNotified_(that.confChangeNotified_)
+ 		, confChanged_(that.confChanged_)
+ 	{}
+ 	ClientHandler& operator=(ClientHandler const& that)
+@@ -45,6 +46,7 @@
+ 		line_.reset();
+ 		messages_.clear();
+ 		server_ = that.server_;
++		confChangeNotified_ = that.confChangeNotified_;
+ 		confChanged_ = that.confChanged_;
+ 		return *this;
+ 	}
+@@ -55,6 +57,7 @@
+     size_t searchNext(size_t pos);
+     
+     bool sendConf();
++	bool sendConfChangeNotification();
+     
+     void writeError(std::string const& msg);
+ 
+@@ -63,6 +66,7 @@
+     std::string messages_;
+     
+     LogServer* server_;
++    time_t confChangeNotified_;
+     time_t confChanged_;
+ };
+ 
+Index: src/LogClientLogger.cc
+===================================================================
+RCS file: /cvsroot/saloon/wamas_x/utilities/logging/cpp/logtool/src/LogClientLogger.cc,v
+retrieving revision 1.15
+diff -u -r1.15 LogClientLogger.cc
+--- logtool-HEAD/src/LogClientLogger.cc	29 Apr 2011 08:45:57 -0000	1.15
++++ logtool-HEAD/src/LogClientLogger.cc	22 Jul 2011 13:38:33 -0000
+@@ -36,6 +36,7 @@
+ 	, confFile_()
+ 	, pid_(getpid())
+ 	, checkInterval_(LOG_CHECKSERVER)
++	, confUpdateRequested_(true)
+ {
+     if ( LogWriter::instance().driver() == 0 ) {
+         boost::shared_ptr<logging::LocalDriver> driver(new logging::LocalDriver);
+@@ -83,7 +84,7 @@
+         return (false);   
+     }
+     
+-    if ( LogConfMgr::instance().conf() == 0 ) {
++    if ( LogConfMgr::instance().conf() == 0 || confUpdateRequested_ ) {
+         /* check for LogConf */
+         const_cast<LogClientLogger*>(this)->requestConf();
+     }
+@@ -176,7 +177,17 @@
+                         switch (type) {
+                         case LOGCONF_RESPONSE:
+                             LogConfMgr::instance().conf(protV10->logconf());
++							confUpdateRequested_ = false;
+                             break;
++                        case LOGCONF_REQUEST:
++							/* The Logserver tells us to request new log-conf,
++							 * as he cannot send the whole conf without my
++							 * request, as it may not fit into its send-buffer.
++							 * This assumes the request fits into its send-buffer.
++							 * (bug#26396).
++							 */
++							confUpdateRequested_ = true;
++							break;
+                         default:
+                             // to nothing here
+                             break;
+@@ -214,6 +225,7 @@
+     
+     version = prot_->version();
+     if ( version.compare(V10) == 0 ) {
++	  do {
+         Protocol_V10* protV10 = dynamic_cast<Protocol_V10*>(prot_.get());
+         std::stringstream data;
+         std::string request;
+@@ -243,8 +255,8 @@
+                 SockSelect(0, NULL, NULL, NULL, &timeout);
+             }
+         }
+-    }
+-    else {
++	  } while (confUpdateRequested_);
++	} else {
+         return (false);
+     }
+     return (true);    
+@@ -358,7 +370,7 @@
+ 
+ std::string LogClientLogger::logroot()
+ {
+-    if ( logRoot_.empty() ) {
++    if ( logRoot_.empty() || confUpdateRequested_ ) {
+         if ( !requestConf() ) {
+             return "unknown";
+         }
+Index: src/LogClientLogger.h
+===================================================================
+RCS file: /cvsroot/saloon/wamas_x/utilities/logging/cpp/logtool/src/LogClientLogger.h,v
+retrieving revision 1.10
+diff -u -r1.10 LogClientLogger.h
+--- logtool-HEAD/src/LogClientLogger.h	4 Dec 2008 13:48:25 -0000	1.10
++++ logtool-HEAD/src/LogClientLogger.h	22 Jul 2011 13:38:33 -0000
+@@ -64,6 +64,7 @@
+     
+     pid_t pid_;
+     time_t checkInterval_;
++	bool confUpdateRequested_;
+ };
+ 
+         

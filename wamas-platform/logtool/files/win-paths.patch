@@ -1,0 +1,33 @@
+diff -ru logtool-2.3.0.orig/src/LogFile.cc logtool-2.3.0/src/LogFile.cc
+--- logtool-2.3.0.orig/src/LogFile.cc	2013-08-26 10:20:48 +0200
++++ logtool-2.3.0/src/LogFile.cc	2013-08-26 13:55:59 +0200
+@@ -21,6 +21,7 @@
+ 
+ #ifdef __PARITY__
+ # include <internal/pcrt.h>
++# define rename(x, y) rename(PCRT_CONV(x), PCRT_CONV(y))
+ #else
+ # define PCRT_CONV(x) x
+ #endif
+@@ -302,7 +303,7 @@
+         WIN32_FILE_ATTRIBUTE_DATA data;
+         FILETIME time = {0,0};
+ 
+-        if(!GetFileAttributesEx(fullName_.c_str(), GetFileExInfoStandard, &data))
++        if(!GetFileAttributesEx(PCRT_CONV(fullName_.c_str()), GetFileExInfoStandard, &data))
+         {
+             return time;
+         }
+@@ -367,11 +368,7 @@
+ 		 * either larger than MAX_ARCHIVE_FILES, or zero.
+ 		 */
+ 		sprintf(archive_file,"%s.%d",fullName_.c_str(), i-1);
+-#if !defined(_WIN32)
+-			unlink(archive_file);
+-#else /* _WIN32 */
+-			_unlink(archive_file);
+-#endif /* _WIN32 */
++		unlink(archive_file);
+ 		--i;
+ 	} while(i > maxFiles_);
+ 	

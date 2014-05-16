@@ -1,0 +1,15 @@
+--- logtool-2.2.2/src/logtool.cc.orig	2010-06-07 09:29:34.348138669 +0200
++++ logtool-2.2.2/src/logtool.cc	2010-06-07 09:50:48.917904810 +0200
+@@ -248,10 +248,10 @@
+     int rv = 0;
+     
+     if ( facility == NULL ) {
+-        throw logging::LogToolError("LogPrintf() has been called without facility!");
++		facility = "NULL";
+     }
+     if ( fmt == NULL ) {
+-        throw logging::LogToolError("LogPrintf() has been called without format string!");
++		fmt = "logmessage <null>";
+     }
+     
+     if ( logging::LoggerMgr::check(facility, level) ) {

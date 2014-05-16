@@ -1,0 +1,186 @@
+diff -u -r1.23 logtool-2.3.0/src/LogFile.cc
+--- logtool-2.3.0/src/LogFile.cc	2 Jul 2012 14:14:22 -0000	1.23
++++ logtool-2.3.0/src/LogFile.cc	13 Jun 2013 07:11:31 -0000
+@@ -15,6 +15,7 @@
+ # include <unistd.h>
+ #endif /* ! _WIN32 */
+ #include "_logtool.h"
++#include "logtool_mkdirp.h"
+ 
+ #include <climits>
+ 
+@@ -28,7 +29,6 @@
+     namespace platform {
+         namespace logging {
+ 
+-
+ LogFile::LogFile(std::string const& nam, ActionPtr action)
+ 	: name_(nam)
+ 	, fullName_()
+@@ -101,7 +101,7 @@
+         if ( path == 0 ) {
+             return (false);
+         }
+-        if ( mkdirp(path) < 0) {
++        if ( logtool_mkdirp(path) < 0 ) {
+             free(path);
+             return (false);
+         }
+diff -u -r1.14 logtool-2.3.0/src/LogFiles.cc
+--- logtool-2.3.0/src/LogFiles.cc	22 Jan 2009 10:49:09 -0000	1.14
++++ logtool-2.3.0/src/LogFiles.cc	13 Jun 2013 07:11:31 -0000
+@@ -49,7 +49,7 @@
+             }
+             
+             closeOld();
+-                
++
+             if ( !newFile->open() ) {
+                 writeError("LogFile::open()");
+                 return file;
+diff -u -r1.12 logtool-2.3.0/src/LogStat.cc
+--- logtool-2.3.0/src/LogStat.cc	22 Jan 2009 10:49:09 -0000	1.12
++++ logtool-2.3.0/src/LogStat.cc	13 Jun 2013 07:11:31 -0000
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "LogStat.h"
++#include "logtool_mkdirp.h"
+ #include <filename.h>
+ 
+ #include <iostream>
+@@ -206,7 +207,7 @@
+     if ( path == 0 ) {
+         return;
+     }
+-	if ( mkdirp(path) < 0) {
++	if ( logtool_mkdirp(path) < 0 ) {
+ 		return;
+ 	}
+ 
+@@ -241,7 +242,7 @@
+     if ( path == 0 ) {
+         return;
+     }
+-	if ( mkdirp(path) < 0) {
++	if ( logtool_mkdirp(path) < 0 ) {
+ 		return;
+ 	}
+     free(path);
+diff -N logtool-2.3.0/src/logtool_mkdirp.cc
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ logtool-2.3.0/src/logtool_mkdirp.cc	13 Jun 2013 07:11:31 -0000
+@@ -0,0 +1,89 @@
++/**********************************************************************
+++*  PACKAGE:   	LogTool (general purpose logs)
+++*  PURPOSE:   	multiplex a log message according to logconf via driver set
+++*  PURPOSE:   	general purpose name expansion, file handling, header writer
+++*  CONTENTS:  	
+++*				int _LogWriteIt (const LogTmessage *LogMsg, 
+++*								int minLevel, const LogTdriver *Driver)
+++*  COPYRIGHT NOTICE:
+++*  		(c) Copyright 2012 by
+++*                  Salomon Automationstechnik Ges.m.b.H
+++*                  Friesachstrasse 15
+++*                  A-8114 Stuebing
+++*                  Tel.: ++43 3127 200-0
+++*                  Fax.: ++43 3127 200-22
+++**********************************************************************/
++
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <cerrno>
++#include <climits>
++#include <fcntl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++
++#if defined(_WIN32)
++#include <direct.h>
++#endif
++
++#include <filename.h>
++
++namespace wamas {
++    namespace platform {
++        namespace logging {
++
++/**
++ * Workaround for Solaris:
++ * There is an int mkdirp(const char *path, mode_t mode) in libgen.so on Solaris, so this implementation
++ * would get called instead of the one in libwamas-runtime_file.so.
++ * See bug#32798.
++ */
++int logtool_mkdirp(char *path)
++{
++    char newpath[MAXPATHLEN];
++    char *pathpart;
++
++    pathpart = strtok(path, "/");
++    if (pathpart == NULL) {
++       return (0);
++    }
++   
++    if ( *path == '/' ) {
++        sprintf(newpath, "/%s", pathpart);
++    }
++    else { 
++        sprintf(newpath, "%s", pathpart);
++    }
++    if ( 
++#if defined(_WIN32)
++        mkdir(newpath)
++#else        
++        mkdir(newpath, 0777)
++#endif        
++        < 0) {
++        if ( errno != EEXIST ) 
++            return(-1);
++    }
++    
++    while( (pathpart = strtok(NULL, "/")) != NULL) {
++        strcat(newpath, "/");
++        strcat(newpath, pathpart);
++
++        if ( 
++#if defined(_WIN32) 
++            mkdir(newpath)
++#else        
++            mkdir(newpath, 0777)
++#endif        
++            < 0 ) {
++            if ( errno != EEXIST ) 
++                return(-1);
++        }
++    }
++    return (1);
++}
++
++} // /namespace
++} // /namespace
++} // /namespace
+diff -N logtool-2.3.0/src/logtool_mkdirp.h
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ logtool-2.3.0/src/logtool_mkdirp.h	13 Jun 2013 07:11:31 -0000
+@@ -0,0 +1,20 @@
++/**
++ * @file
++ * @author Copyright (c) 2013 Salomon Automation GmbH
++ */
++
++#ifndef _WAMAS_PLATFORM_LOGGING_LOGTOOL_MKDIRP_H
++#define _WAMAS_PLATFORM_LOGGING_LOGTOOL_MKDIRP_H
++
++namespace wamas {
++    namespace platform {
++        namespace logging {
++
++/* See bug#32798. */
++int logtool_mkdirp(char *path);
++  
++} // /namespace
++} // /namespace
++} // /namespace
++
++#endif /* _WAMAS_PLATFORM_LOGGING_LOGTOOL_MKDIRP_H */

@@ -1,0 +1,10 @@
+--- src/LogServer.h.orig	2009-07-28 17:12:23.913903000 +0200
++++ src/LogServer.h	2009-07-28 17:12:45.873284000 +0200
+@@ -8,6 +8,7 @@
+ 
+ #include <list>
+ #include <boost/thread.hpp>
++#include <boost/thread/condition.hpp>
+ #include <boost/scoped_ptr.hpp>
+ #include <ssocket.h>
+ 

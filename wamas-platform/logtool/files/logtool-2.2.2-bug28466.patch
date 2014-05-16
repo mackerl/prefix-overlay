@@ -1,0 +1,72 @@
+Index: src/LogLine.cc
+===================================================================
+RCS file: /cvsroot/saloon/wamas_x/utilities/logging/cpp/logtool/src/LogLine.cc,v
+retrieving revision 1.18
+diff -u -r1.18 LogLine.cc
+--- src/LogLine.cc	29 Apr 2011 08:45:57 -0000	1.18
++++ src/LogLine.cc	2 Jul 2012 11:21:41 -0000
+@@ -35,48 +35,34 @@
+ 
+ bool LogLine::receive(fd_set* readfd)
+ {
+-    unsigned char buffer[LOGBUFFER+1] = { 0 };
+-    int     readLen, len = LOGBUFFER;
+- 
+-    if ( !(FD_ISSET(sock_, readfd)) ) {
++    unsigned char buffer[LOGBUFFER+1];
++    int  len;
++
++    if ( sock_ == INVALID_SOCKET || !(FD_ISSET(sock_, readfd)) ) {
+         return (false);
+     }
+-       
+-    readLen = 0;
++
+     line_.str("");
+-    
++
+     len = SockRecv(sock_, buffer, LOGBUFFER, 0);
+-    buffer[LOGBUFFER] = '\0';
+     if (len < 0 ) {
+-#if defined(_WIN32)
+-        if ( WSAGetLastError() == WSAECONNRESET ) {
+-            SockClose(sock_);
+-            connected_ = false;
+-            return (false);
+-        }
+-        else {
+-            writeError("SockRecv()");
++        writeError("SockRecv()");
++        if (SockErrno() == SOEINTR) {
+             return (false);
+         }
+-#else /* ! _WIN32 */
+-        writeError("SockRecv()");
+-        return (false);
+-#endif /* ! _WIN32 */
+-
+-    }
+-    
+-    if ( len > 0 ) {
+-        line_ << buffer;
+     }
+-    readLen += len;
+ 
+-    /* check if client has disconnected */
+-    if ( readLen <= 0 ) {
+-        SockClose(sock_);
++    if (len <= 0) {
++        /* check if client has disconnected */
+         connected_ = false;
++        SockClose(sock_);
++        sock_ = INVALID_SOCKET;
+         return (false);
+     }
+-    return (true); 
++
++    buffer[len] = '\0';
++    line_ << buffer;
++    return (true);
+ }
+ 
+ bool LogLine::send(std::string const & msg)

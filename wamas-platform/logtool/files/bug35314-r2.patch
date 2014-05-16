@@ -1,0 +1,20 @@
+? .cproject
+? Debug
+Index: src/LogClientLogger.cc
+===================================================================
+RCS file: /cvsrootb/saloon/wamas_x/utilities/logging/cpp/logtool/src/LogClientLogger.cc,v
+retrieving revision 1.22
+diff -u -r1.22 LogClientLogger.cc
+--- src/LogClientLogger.cc	6 Dec 2013 11:09:45 -0000	1.22
++++ src/LogClientLogger.cc	11 Mar 2014 10:55:19 -0000
+@@ -69,7 +69,9 @@
+             receiveData();
+         }
+         if ( ! conn_.connected() ) {
+-        	if ( LogConfMgr::instance().conf() == 0 ) {
++        	LogConfPtr localconf=LogConfMgr::instance().conf();
++        	LocalConf* toConvert=dynamic_cast<LocalConf*>(localconf.get());
++        	if ( toConvert == 0 ) {
+         		LogConfPtr conf(new LocalConf());
+         		LogConfMgr::instance().conf(conf);
+         	}
