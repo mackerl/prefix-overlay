@@ -1,0 +1,43 @@
+# ChangeLog for x11-libs/lesstif
+# Copyright 1999-2012 Gentoo Foundation; Distributed under the GPL v2
+# $Header: $
+
+  09 Oct 2012; Michael Haubenwallner <haubi@gentoo.org>
+  lesstif-0.95.2-r00.1.ebuild:
+  stable ppc-aix hppa-hpux ia64-hpux x86-linux sparc-solaris x86-solaris
+  x86-winnt
+
+  24 Sep 2012; Michael Haubenwallner <haubi@gentoo.org>
+  lesstif-0.95.2-r00.1.ebuild:
+  Depend on x11-libs/libXt-1.0.6-r00.1 for Windows.
+  Keyword ~ppc-aix ~hppa-hpux ~ia64-hpux ~x86-linux ~sparc-solaris
+  ~x86-solaris ~x86-winnt (bug#30347).
+
+*lesstif-0.95.2-r00.1 (31 Aug 2012)
+
+  31 Aug 2012; Markus Duft <markus.duft@salomon.at> +lesstif-0.95.2-r00.1:
+  Add support for X11 on winnt (required for XMv).
+
+  25 Mar 2010; Michael Haubenwallner <haubi@gentoo.org>
+  lesstif-0.95.2.ebuild, +files/lesstif-0.95.2-xmlibexport.patch:
+  fix undefined XMLIBEXPORT in XmStrDefs.h
+
+  25 Mar 2010; Michael Haubenwallner <haubi@gentoo.org>
+  lesstif-0.95.2.ebuild:
+  fix check for Xrender.h, add elibtoolize
+
+  25 Mar 2010; Markus Duft <mduft@gentoo.org> lesstif-0.95.2.ebuild,
+  +files/lesstif-0.95.2-no-m4.patch:
+  added patch to avoid installing m4 file (especially broken with
+  prefix-chaining)
+
+  25 Mar 2010; Markus Duft <mduft@gentoo.org> lesstif-0.95.2.ebuild:
+  make ebuild prefix aware
+
+*lesstif-0.95.2 (25 Mar 2010)
+
+  25 Mar 2010; Markus Duft <mduft@gentoo.org>
+  +files/lesstif-0.95.0-vendorsp-cxx.patch, +lesstif-0.95.2.ebuild,
+  +files/CAN-2005-0605.patch, +metadata.xml:
+  resurrected lesstif due to openmotif licensing issues on most platforms
+
