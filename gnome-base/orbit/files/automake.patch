@@ -5,31 +5,42 @@
  test_any_client_SOURCES=test-any-client.c $(TEST_ANY_IDLOUT)
  test_any_server_SOURCES=test-any-server.c $(TEST_ANY_IDLOUT)
 -$(srcdir)/test-any-client.c $(srcdir)/test-any-server.c: test-any.h
-+test-any-client.c test-any-server.c: test-any.h
++src/test-any-client.c src/test-any-server.c: test-any.h
  
  ECHO_IDLOUT=echo.h echo-common.c echo-stubs.c echo-skels.c
  echo_client_SOURCES=echo-client.c $(ECHO_IDLOUT)
  echo_client_t_SOURCES=echo-client-t.c $(ECHO_IDLOUT)
  echo_server_SOURCES=echo-server.c echo-srv.c $(ECHO_IDLOUT) echo-share.h$
 -$(srcdir)/echo-client-t.c $(srcdir)/echo-client.c $(srcdir)/echo-server.c $(srcdir)/echo-srv.c: echo.h
-+echo-client-t.c echo-client.c echo-server.c echo-srv.c: echo.h
++src/echo-client-t.c src/echo-client.c src/echo-server.c src/echo-srv.c: echo.h
  
  EMPTY_IDLOUT=empty.h empty-common.c empty-stubs.c empty-skels.c
  empty_client_SOURCES=empty-client.c $(EMPTY_IDLOUT)
  empty_server_SOURCES=empty-server.c $(EMPTY_IDLOUT)
 -$(srcdir)/empty-client.c $(srcdir)/empty-server.c: empty.h
-+empty-client.c empty-server.c: empty.h
++src/empty-client.c src/empty-server.c: empty.h
  
  TIMEOUT_IDLOUT=timeout.h timeout-common.c timeout-stubs.c timeout-skels.c
  timeout_client_SOURCES=timeout-client.c $(TIMEOUT_IDLOUT)
  timeout_server_SOURCES=timeout-server.c $(TIMEOUT_IDLOUT)
 -$(srcdir)/timeout-client.c $(srcdir)/timeout-server.c: timeout.h
-+timeout-client.c timeout-server.c: timeout.h
++src/timeout-client.c src/timeout-server.c: timeout.h
  
  IDLOUT=test1-stubs.c test1-skels.c test1-common.c test1.h
  test1_SOURCES=test1.c $(IDLOUT)
 -$(srcdir)/test1.c: test1.h
-+test1.c: test1.h
++src/test1.c: test1.h
  
  test_mem_SOURCES=test-mem.c $(IDLOUT)
+ 
+--- test/everything/Makefile.am.orig	2014-05-27 07:50:54.591594874 +0200
++++ test/everything/Makefile.am	2014-05-27 07:51:28.111595404 +0200
+@@ -78,7 +78,7 @@
+ BUILT_SOURCES = ${EVERYTHING_BUILT} everything-imodule.c
+ CLEANFILES = ${BUILT_SOURCES} iorfile
+ 
+-TESTS = $(srcdir)/test.sh
++TESTS = src/test.sh
+ 
+ EXTRA_DIST = $(IDL_FILES) test.sh $(included_src)
  
