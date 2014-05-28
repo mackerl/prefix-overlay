@@ -1,8 +1,9 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/dev-util/confix/confix-2.1.0-r3.ebuild,v 1.2 2009/10/16 08:18:01 haubi Exp $
+EAPI="4"
 
-inherit distutils
+inherit distutils eutils
 
 DESCRIPTION="Confix: A Build Tool on Top of GNU Automake"
 HOMEPAGE="http://confix.sourceforge.net"
@@ -38,8 +39,6 @@ src_unpack() {
 	epatch "${FILESDIR}"/2.3.0/local-libs-first.patch
 	# don't use automake 1.9, but any newer too...
 	epatch "${FILESDIR}"/2.3.0/new-automake.patch
-	# respect CONFIG_SHELL environment variable
-	epatch "${FILESDIR}"/2.3.7-config_shell.patch
 }
 
 pkg_preinst() {
