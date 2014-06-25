@@ -1,6 +1,0 @@
-# required by =gcc-4.8.2-r1 (argument)
-# /tools/local/gentoo-prefix/usr/portage/profiles/package.mask:
-# Magnus Granberg <zorry@gentoo.org>
-# Gcc 4.8.2-r1 has default ssp and need testing,
-# See #484714
-=sys-devel/gcc-4.8.2-r1

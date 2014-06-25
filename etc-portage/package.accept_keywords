@@ -1,4 +1,0 @@
-sys-devel/gcc **
-# required by dev-util/buildbot-0.8.8-r2
-# required by buildbot (argument)
-=dev-python/sqlalchemy-migrate-0.7.2-r1 **
