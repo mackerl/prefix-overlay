@@ -1,5 +1,5 @@
 ACCEPT_KEYWORDS="~x86-linux x86-linux ~buildbot buildbot x86 ~x86"
-USE="unicode nls"
+USE="unicode nls python vim-syntax"
 CFLAGS="${CFLAGS} -O2 -pipe"
 CXXFLAGS="${CFLAGS}"
 MAKEOPTS="-j5"
