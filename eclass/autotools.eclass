@@ -46,7 +46,7 @@ inherit libtool multiprocessing
 # Do NOT change this variable in your ebuilds!
 # If you want to force a newer minor version, you can specify the correct
 # WANT value by using a colon:  <PV>:<WANT_AUTOMAKE>
-_LATEST_AUTOMAKE=( 1.13:1.13 1.14:1.14 )
+_LATEST_AUTOMAKE=( 1.11:1.11 1.13:1.13 1.14:1.14 )
 
 _automake_atom="sys-devel/automake"
 _autoconf_atom="sys-devel/autoconf"
@@ -74,7 +74,7 @@ if [[ -n ${WANT_AUTOCONF} ]] ; then
 		none)       _autoconf_atom="" ;; # some packages don't require autoconf at all
 		2.1)        _autoconf_atom="=sys-devel/autoconf-${WANT_AUTOCONF}*" ;;
 		# if you change the "latest" version here, change also autotools_env_setup
-		latest|2.5) _autoconf_atom=">=sys-devel/autoconf-2.68" ;;
+		latest|2.5) _autoconf_atom=">=sys-devel/autoconf-2.60" ;;
 		*)          die "Invalid WANT_AUTOCONF value '${WANT_AUTOCONF}'" ;;
 	esac
 	export WANT_AUTOCONF
@@ -92,7 +92,7 @@ fi
 
 # Force people (nicely) to upgrade to a newer version of gettext as
 # older ones are known to be crappy.  #496454
-AUTOTOOLS_DEPEND="!<sys-devel/gettext-0.18.1.1-r3
+AUTOTOOLS_DEPEND="!<sys-devel/gettext-0.17
 	${_automake_atom}
 	${_autoconf_atom}
 	${_libtool_atom}"
@@ -419,7 +419,7 @@ config_rpath_update() {
 # @DESCRIPTION:
 # Process the WANT_AUTO{CONF,MAKE} flags.
 autotools_env_setup() {
-	# We do the "latest" → version switch here because it solves
+	# We do the "latest" â version switch here because it solves
 	# possible order problems, see bug #270010 as an example.
 	# During bootstrap in prefix there might be no automake merged yet
 	# due to --nodeps, but still available somewhere in PATH.

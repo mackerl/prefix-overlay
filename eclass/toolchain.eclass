@@ -210,7 +210,7 @@ if in_iuse gcj ; then
 	DEPEND+=" gcj? ( awt? ( ${GCJ_GTK_DEPS} ) ${GCJ_DEPS} )"
 fi
 
-PDEPEND=">=sys-devel/gcc-config-1.7"
+PDEPEND=">=sys-devel/gcc-config-1.4"
 
 #---->> S + SRC_URI essentials <<----
 
