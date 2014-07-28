@@ -2,7 +2,7 @@ app-portage/layman subversion
 media-libs/gd png
 sys-devel/gcc gcj
 x11-libs/cairo X
-virtual/jdk -X a-bin -X -cups
+virtual/jdk a-bin -X -cups
 dev-libs/boost icu 
 dev-lang/python sqlite
 app-editors/vim X perl 
