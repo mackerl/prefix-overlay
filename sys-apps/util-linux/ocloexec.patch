@@ -1,0 +1,46 @@
+--- lib/canonicalize.c.orig	2014-07-28 13:24:26.000000000 +0200
++++ lib/canonicalize.c	2014-07-28 13:24:55.000000000 +0200
+@@ -15,6 +15,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ 
++#include "c.h"
+ #include "canonicalize.h"
+ 
+ /*
+--- lib/randutils.c.orig	2014-07-28 13:24:26.000000000 +0200
++++ lib/randutils.c	2014-07-28 13:25:03.000000000 +0200
+@@ -16,6 +16,7 @@
+ #include <sys/syscall.h>
+ 
+ #include "randutils.h"
++#include "c.h"
+ 
+ #ifdef HAVE_TLS
+ #define THREAD_LOCAL static __thread
+--- lib/wholedisk.c.orig	2014-07-28 13:24:26.000000000 +0200
++++ lib/wholedisk.c	2014-07-28 13:25:10.000000000 +0200
+@@ -10,6 +10,7 @@
+ 
+ #include "blkdev.h"
+ #include "wholedisk.h"
++#include "c.h"
+ 
+ int is_whole_disk_fd(int fd, const char *name)
+ {
+--- include/c.h.orig	2014-07-28 13:40:53.000000000 +0200
++++ include/c.h	2014-07-28 13:43:34.000000000 +0200
+@@ -300,4 +300,13 @@
+ # define SEEK_HOLE	4
+ #endif
+ 
++#ifndef HAVE_MKOSTEMP
++static inline int mkostemp(char *template, int flags)
++{
++	int fd;
++	fd = mkstemp(template);
++	return fd;
++}
++#endif
++
+ #endif /* UTIL_LINUX_C_H */
