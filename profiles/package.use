@@ -6,3 +6,4 @@ virtual/jdk a-bin -X -cups
 dev-libs/boost icu 
 dev-lang/python sqlite
 app-editors/vim X perl 
+x11-libs/libSM -uuid
